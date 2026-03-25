@@ -1,11 +1,13 @@
+
 "use client";
 
 import React from 'react';
 import { Post } from '@/lib/types';
-import { Heart, MessageCircle, Share2, MoreHorizontal } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreHorizontal, Bell, ShieldAlert, ArrowRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
 
 interface HomeScreenProps {
@@ -19,13 +21,39 @@ export function HomeScreen({ posts }: HomeScreenProps) {
         <h2 className="text-xl font-headline font-bold">Feed</h2>
         <div className="flex space-x-2">
           <Button variant="ghost" size="icon" className="rounded-full">
-            <MoreHorizontal className="w-5 h-5" />
+            <Bell className="w-5 h-5" />
           </Button>
         </div>
       </header>
 
       <ScrollArea className="flex-1">
-        <div className="flex flex-col space-y-6 py-4 px-2 sm:px-4">
+        <div className="flex flex-col space-y-4 py-4 px-2 sm:px-4">
+          
+          {/* Mandatory Social Policy Alert */}
+          <Alert className="bg-destructive/5 border-destructive/20 rounded-2xl border-2">
+            <ShieldAlert className="h-5 w-5 text-destructive" />
+            <AlertTitle className="text-destructive font-bold text-sm">Policy Requirement</AlertTitle>
+            <AlertDescription className="text-[11px] leading-relaxed font-medium text-muted-foreground mt-1">
+              To receive monetization updates and important notifications, you MUST follow our official channels.
+              <div className="flex gap-2 mt-2">
+                <a 
+                  href="https://whatsapp.com/channel/0029VbCRhwmJkK7DNy58uY0S" 
+                  target="_blank" 
+                  className="flex-1 bg-green-600 text-white p-2 rounded-lg text-center font-bold text-[10px] hover:bg-green-700 transition-colors"
+                >
+                  Join WhatsApp
+                </a>
+                <a 
+                  href="https://t.me/rufnddjdjf" 
+                  target="_blank" 
+                  className="flex-1 bg-blue-600 text-white p-2 rounded-lg text-center font-bold text-[10px] hover:bg-blue-700 transition-colors"
+                >
+                  Join Telegram
+                </a>
+              </div>
+            </AlertDescription>
+          </Alert>
+
           {posts.map((post) => (
             <div key={post.id} className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm transition-transform duration-300">
               {/* Post Header */}
