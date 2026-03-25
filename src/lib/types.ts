@@ -22,4 +22,4 @@ export type Post = {
   userAvatar: string;
 };
 
-export type AppScreen = 'HOME' | 'UPLOAD' | 'PROFILE' | 'DASHBOARD' | 'ADMIN';
+export type AppScreen = 'HOME' | 'UPLOAD' | 'PROFILE' | 'DASHBOARD' | 'ADMIN' | 'STATIC_PAGES';

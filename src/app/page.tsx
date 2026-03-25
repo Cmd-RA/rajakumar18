@@ -15,6 +15,8 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 
+const ADMIN_EMAIL = 'rajahribabakumar@gmail.com';
+
 const INITIAL_POSTS: Post[] = [
   {
     id: 'post-1',
@@ -62,16 +64,18 @@ export default function AppContainer() {
   }, [user, currentScreen]);
 
   // Transfrom Firebase User to App User type
+  const isAdmin = user?.email === ADMIN_EMAIL;
+  
   const appUser = user ? {
     id: user.uid,
     username: user.email?.split('@')[0] || 'user',
     displayName: user.displayName || user.email?.split('@')[0] || 'User',
     bio: 'Visual Storyteller',
     avatarUrl: user.photoURL || `https://picsum.photos/seed/${user.uid}/200/200`,
-    followerCount: 0,
-    followingCount: 0,
-    isMonetized: false,
-    isAdmin: false, // Default false, set by admin roles collection normally
+    followerCount: isAdmin ? 15000 : 420, // Mock stats for demo
+    followingCount: 150,
+    isMonetized: isAdmin,
+    isAdmin: isAdmin,
   } : null;
 
   if (isUserLoading) {
@@ -89,7 +93,7 @@ export default function AppContainer() {
       case 'UPLOAD':
         return <UploadScreen onPostCreated={(newPost) => setPosts([newPost, ...posts])} onNavigate={setCurrentScreen} />;
       case 'PROFILE':
-        return <ProfileScreen user={appUser} posts={posts.filter(p => p.userId === user?.uid)} />;
+        return <ProfileScreen user={appUser} posts={posts.filter(p => p.userId === user?.uid)} onNavigate={setCurrentScreen} />;
       case 'DASHBOARD':
         return <DashboardScreen user={appUser} />;
       case 'ADMIN':
@@ -101,6 +105,7 @@ export default function AppContainer() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row">
+      {/* Sidebar for Desktop */}
       <div className="hidden md:block">
         <Sidebar 
           currentScreen={currentScreen} 
@@ -115,6 +120,7 @@ export default function AppContainer() {
         </div>
       </main>
 
+      {/* Bottom Nav for Mobile */}
       <div className="md:hidden">
         <BottomNav 
           currentScreen={currentScreen} 

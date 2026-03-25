@@ -1,26 +1,31 @@
 "use client";
 
 import React from 'react';
-import { User, Post } from '@/lib/types';
-import { Settings, Grid, Bookmark, Users, Activity } from 'lucide-react';
+import { User, Post, AppScreen } from '@/lib/types';
+import { Settings, Grid, Bookmark, Activity, MessageCircle, Send, Award, Info } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
 
 interface ProfileScreenProps {
   user: User | null;
   posts: Post[];
+  onNavigate: (screen: AppScreen) => void;
 }
 
-export function ProfileScreen({ user, posts }: ProfileScreenProps) {
+export function ProfileScreen({ user, posts, onNavigate }: ProfileScreenProps) {
   if (!user) return null;
+
+  const threshold = 5000;
+  const isEligible = user.followerCount >= threshold;
 
   return (
     <div className="flex flex-col h-full bg-background">
       <header className="p-4 border-b border-border bg-card flex justify-between items-center sticky top-0 z-10">
-        <h2 className="text-xl font-headline font-bold">Channel</h2>
+        <h2 className="text-xl font-headline font-bold">Channel Profile</h2>
         <Button variant="ghost" size="icon" className="rounded-full">
           <Settings className="w-5 h-5" />
         </Button>
@@ -28,6 +33,23 @@ export function ProfileScreen({ user, posts }: ProfileScreenProps) {
 
       <ScrollArea className="flex-1">
         <div className="p-6 space-y-6">
+          {/* Mandatory Join Reminder */}
+          <Alert className="bg-primary/10 border-primary/20 rounded-2xl">
+            <Info className="h-4 w-4 text-primary" />
+            <AlertTitle className="text-primary font-bold">Important Notification</AlertTitle>
+            <AlertDescription className="text-xs font-medium">
+              Join our channels to get instant updates about monetization and live streams.
+              <div className="flex space-x-4 mt-3">
+                <a href="https://whatsapp.com/channel/0029VbCRhwmJkK7DNy58uY0S" target="_blank" className="flex items-center text-green-600 font-bold hover:underline">
+                  <MessageCircle className="w-4 h-4 mr-1" /> WhatsApp
+                </a>
+                <a href="https://t.me/rufnddjdjf" target="_blank" className="flex items-center text-blue-600 font-bold hover:underline">
+                  <Send className="w-4 h-4 mr-1" /> Telegram
+                </a>
+              </div>
+            </AlertDescription>
+          </Alert>
+
           {/* User Info Header */}
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="relative">
@@ -43,7 +65,10 @@ export function ProfileScreen({ user, posts }: ProfileScreenProps) {
             </div>
             
             <div className="space-y-1">
-              <h1 className="text-2xl font-headline font-bold">{user.displayName}</h1>
+              <div className="flex items-center justify-center space-x-2">
+                <h1 className="text-2xl font-headline font-bold">{user.displayName}</h1>
+                {isEligible && <Award className="w-5 h-5 text-yellow-500" />}
+              </div>
               <p className="text-muted-foreground font-medium">@{user.username}</p>
             </div>
 
@@ -67,8 +92,13 @@ export function ProfileScreen({ user, posts }: ProfileScreenProps) {
             </div>
 
             <div className="flex w-full space-x-3">
-              <Button className="flex-1 rounded-xl bg-primary shadow-lg shadow-primary/20">Edit Profile</Button>
-              <Button variant="outline" className="flex-1 rounded-xl border-primary/20">Share Channel</Button>
+              <Button 
+                onClick={() => onNavigate('DASHBOARD')}
+                className="flex-1 rounded-xl bg-primary shadow-lg shadow-primary/20"
+              >
+                Dashboard
+              </Button>
+              <Button variant="outline" className="flex-1 rounded-xl border-primary/20">Edit Profile</Button>
             </div>
           </div>
 
