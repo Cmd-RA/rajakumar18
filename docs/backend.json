@@ -45,9 +45,10 @@
     "SiteSettings": {
       "title": "SiteSettings",
       "type": "object",
-      "description": "Global site configurations like AdSense code and Meta tags.",
+      "description": "Global site configurations like AdSense code, Meta tags, and Live Stream links.",
       "properties": {
         "adsenseCode": { "type": "string", "description": "The script or meta tag provided by Google AdSense." },
+        "liveVideoUrl": { "type": "string", "description": "The URL for the featured live video stream." },
         "updatedAt": { "type": "string", "format": "date-time" }
       }
     }
@@ -82,7 +83,7 @@
         "path": "/settings/site_config",
         "definition": {
           "entityName": "SiteSettings",
-          "description": "Global settings for SEO and AdSense. Only admin can write."
+          "description": "Global settings for SEO, AdSense, and Live Stream. Only admin can write."
         }
       },
       {

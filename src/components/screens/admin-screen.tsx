@@ -42,6 +42,7 @@ export function AdminScreen() {
   useEffect(() => {
     if (config) {
       setAdsenseCode(config.adsenseCode || '');
+      setLiveUrl(config.liveVideoUrl || '');
     }
   }, [config]);
 
@@ -52,14 +53,15 @@ export function AdminScreen() {
     const ref = doc(firestore, 'settings', 'site_config');
     setDocumentNonBlocking(ref, { 
       adsenseCode, 
+      liveVideoUrl: liveUrl,
       updatedAt: new Date().toISOString() 
     }, { merge: true });
     
     setTimeout(() => {
       setIsSaving(false);
       toast({ 
-        title: "Settings Updated Successfully!", 
-        description: "Your AdSense/SEO code is now live and injected into the site head." 
+        title: "System Updated!", 
+        description: "AdSense and Live Video settings are now live." 
       });
     }, 1000);
   };
@@ -132,19 +134,23 @@ export function AdminScreen() {
                     <Video className="w-5 h-5 mr-2 text-primary" />
                     Live Streaming Manager
                   </CardTitle>
+                  <CardDescription className="font-medium">Update the featured live video link for all users.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                   <div className="space-y-2">
-                    <p className="text-sm font-bold text-muted-foreground">Weekly Live Link (YouTube/Telegram)</p>
+                    <p className="text-sm font-bold text-muted-foreground">Video Embed URL (YouTube/Vimeo)</p>
                     <div className="flex space-x-2">
                       <Input 
-                        placeholder="Paste URL here..." 
+                        placeholder="https://www.youtube.com/watch?v=..." 
                         value={liveUrl}
                         onChange={(e) => setLiveUrl(e.target.value)}
                         className="rounded-xl h-12"
                       />
-                      <Button onClick={() => toast({title: "Live URL Saved"})} className="rounded-xl px-6 h-12">Save</Button>
+                      <Button onClick={handleUpdateConfig} disabled={isSaving} className="rounded-xl px-6 h-12">
+                        {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Save Link"}
+                      </Button>
                     </div>
+                    <p className="text-[10px] text-muted-foreground italic">Tip: Paste a regular YouTube link, the system will automatically format it for the player.</p>
                   </div>
                 </CardContent>
               </Card>
@@ -270,7 +276,7 @@ export function AdminScreen() {
                     {isConfigLoading && <RefreshCw className="w-4 h-4 animate-spin text-accent" />}
                   </div>
                   <CardDescription className="font-medium">
-                    Paste your AdSense verification code or Auto-Ads script below. This code will be injected into every page's HEAD automatically.
+                    Paste your AdSense verification code or Auto-Ads script below.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
@@ -286,65 +292,16 @@ export function AdminScreen() {
                     </div>
                   </div>
                   
-                  <div className="bg-accent/5 p-4 rounded-xl border border-accent/20 flex items-start space-x-3">
-                    <Activity className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-                    <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-                      <span className="font-bold text-accent">Pro Tip:</span> Once you paste the code and click "Save & Inject", Google's crawlers will be able to detect the code on your site for verification.
-                    </p>
-                  </div>
-
                   <Button 
                     onClick={handleUpdateConfig} 
                     disabled={isSaving}
                     className="w-full rounded-2xl py-7 font-bold bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-lg transition-transform active:scale-95"
                   >
-                    {isSaving ? (
-                      <>
-                        <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
-                        Saving to Database...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-5 h-5 mr-2" /> 
-                        Save & Inject Code Now
-                      </>
-                    )}
+                    {isSaving ? <RefreshCw className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
+                    Save & Inject System Config
                   </Button>
                 </CardContent>
               </Card>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="p-6 rounded-2xl shadow-sm border-border">
-                  <h4 className="font-bold flex items-center mb-4 text-primary"><Settings className="w-4 h-4 mr-2" /> System Monitor</h4>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-muted-foreground">Monetization Engine</span>
-                      <Badge className="bg-green-500 border-none">ACTIVE</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-muted-foreground">AdSense Status</span>
-                      <Badge variant="outline" className="border-accent text-accent">
-                        {adsenseCode ? 'CODE DETECTED' : 'WAITING FOR CODE'}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center pt-2 border-t">
-                      <span className="font-medium text-muted-foreground">Last Update</span>
-                      <span className="text-[10px] font-bold text-muted-foreground">
-                        {config?.updatedAt ? new Date(config.updatedAt).toLocaleString() : 'Never'}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-6 rounded-2xl shadow-sm border-border">
-                  <h4 className="font-bold flex items-center mb-4 text-accent"><LayoutGrid className="w-4 h-4 mr-2" /> Malik Actions</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" className="rounded-xl text-xs h-10 border-primary/20 hover:bg-primary/5">Clear Cache</Button>
-                    <Button variant="outline" className="rounded-xl text-xs h-10 border-primary/20 hover:bg-primary/5">Reset Stats</Button>
-                    <Button variant="outline" className="rounded-xl text-xs h-10 border-primary/20 hover:bg-primary/5 col-span-2">Edit Terms & Policy</Button>
-                  </div>
-                </Card>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
