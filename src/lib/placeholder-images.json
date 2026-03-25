@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "1",
+      "description": "Scenic landscape sunset",
+      "imageUrl": "https://picsum.photos/seed/view1/600/1066",
+      "imageHint": "landscape sunset"
+    },
+    {
+      "id": "2",
+      "description": "Urban city photography",
+      "imageUrl": "https://picsum.photos/seed/view2/600/1066",
+      "imageHint": "urban architecture"
+    },
+    {
+      "id": "3",
+      "description": "Minimalist coffee shop",
+      "imageUrl": "https://picsum.photos/seed/view3/600/1066",
+      "imageHint": "coffee shop"
+    },
+    {
+      "id": "4",
+      "description": "Nature mountain hike",
+      "imageUrl": "https://picsum.photos/seed/view4/600/1066",
+      "imageHint": "mountains hiking"
+    },
+    {
+      "id": "avatar-1",
+      "description": "User profile avatar 1",
+      "imageUrl": "https://picsum.photos/seed/user1/200/200",
+      "imageHint": "portrait person"
+    },
+    {
+      "id": "avatar-2",
+      "description": "User profile avatar 2",
+      "imageUrl": "https://picsum.photos/seed/user2/200/200",
+      "imageHint": "portrait woman"
+    },
+    {
+      "id": "avatar-3",
+      "description": "User profile avatar 3",
+      "imageUrl": "https://picsum.photos/seed/user3/200/200",
+      "imageHint": "portrait man"
+    }
+  ]
 }
