@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { AppScreen, User, Post } from '@/lib/types';
+import { AppScreen, Post } from '@/lib/types';
 import { BottomNav } from '@/components/navigation/bottom-nav';
 import { Sidebar } from '@/components/navigation/sidebar';
 import { HomeScreen } from '@/components/screens/home-screen';
@@ -12,18 +12,8 @@ import { AdminScreen } from '@/components/screens/admin-screen';
 import { AuthModal } from '@/components/auth/auth-modal';
 import { Toaster } from '@/components/ui/toaster';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-
-const MOCK_USER: User = {
-  id: 'current-user',
-  username: 'aditya_pro',
-  displayName: 'Aditya Pro',
-  bio: 'Photographer & Visionary | Sharing my perspective 📸',
-  avatarUrl: PlaceHolderImages.find(img => img.id === 'avatar-1')?.imageUrl || '',
-  followerCount: 4850,
-  followingCount: 120,
-  isMonetized: false,
-  isAdmin: true, // Dev admin
-};
+import { useUser } from '@/firebase';
+import { Loader2 } from 'lucide-react';
 
 const INITIAL_POSTS: Post[] = [
   {
@@ -51,12 +41,47 @@ const INITIAL_POSTS: Post[] = [
 ];
 
 export default function AppContainer() {
+  const { user, isUserLoading } = useUser();
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('HOME');
-  const [currentUser, setCurrentUser] = useState<User | null>(MOCK_USER);
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Simulated screen transitions
+  // Close auth modal when user signs in
+  useEffect(() => {
+    if (user) {
+      setIsAuthModalOpen(false);
+    }
+  }, [user]);
+
+  // Handle protected screens
+  useEffect(() => {
+    if (!user && (currentScreen === 'UPLOAD' || currentScreen === 'DASHBOARD' || currentScreen === 'ADMIN')) {
+      setIsAuthModalOpen(true);
+      setCurrentScreen('HOME');
+    }
+  }, [user, currentScreen]);
+
+  // Transfrom Firebase User to App User type
+  const appUser = user ? {
+    id: user.uid,
+    username: user.email?.split('@')[0] || 'user',
+    displayName: user.displayName || user.email?.split('@')[0] || 'User',
+    bio: 'Visual Storyteller',
+    avatarUrl: user.photoURL || `https://picsum.photos/seed/${user.uid}/200/200`,
+    followerCount: 0,
+    followingCount: 0,
+    isMonetized: false,
+    isAdmin: false, // Default false, set by admin roles collection normally
+  } : null;
+
+  if (isUserLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   const renderScreen = () => {
     switch (currentScreen) {
       case 'HOME':
@@ -64,9 +89,9 @@ export default function AppContainer() {
       case 'UPLOAD':
         return <UploadScreen onPostCreated={(newPost) => setPosts([newPost, ...posts])} onNavigate={setCurrentScreen} />;
       case 'PROFILE':
-        return <ProfileScreen user={currentUser} posts={posts.filter(p => p.userId === currentUser?.id)} />;
+        return <ProfileScreen user={appUser} posts={posts.filter(p => p.userId === user?.uid)} />;
       case 'DASHBOARD':
-        return <DashboardScreen user={currentUser} />;
+        return <DashboardScreen user={appUser} />;
       case 'ADMIN':
         return <AdminScreen />;
       default:
@@ -76,28 +101,25 @@ export default function AppContainer() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row">
-      {/* Desktop Sidebar */}
       <div className="hidden md:block">
         <Sidebar 
           currentScreen={currentScreen} 
           setScreen={setCurrentScreen} 
-          user={currentUser} 
+          user={appUser} 
         />
       </div>
 
-      {/* Main Content Area */}
       <main className="flex-1 pb-16 md:pb-0 relative overflow-hidden flex flex-col items-center">
         <div className="w-full max-w-2xl h-full flex flex-col bg-card/50 md:shadow-xl md:my-4 md:rounded-3xl md:border overflow-hidden">
           {renderScreen()}
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
       <div className="md:hidden">
         <BottomNav 
           currentScreen={currentScreen} 
           setScreen={setCurrentScreen} 
-          user={currentUser}
+          user={appUser}
         />
       </div>
 

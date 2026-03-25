@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/firebase';
+import { initiateGoogleSignIn, initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -14,15 +16,23 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const auth = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmailAuth = (type: 'login' | 'signup') => {
     setLoading(true);
-    // Simulation
-    setTimeout(() => {
-      setLoading(false);
-      onClose();
-    }, 1500);
+    if (type === 'login') {
+      initiateEmailSignIn(auth, email, password);
+    } else {
+      initiateEmailSignUp(auth, email, password);
+    }
+    // The modal will close via the auth state listener in the parent component
+  };
+
+  const handleGoogleSignIn = () => {
+    setLoading(true);
+    initiateGoogleSignIn(auth);
   };
 
   return (
@@ -42,42 +52,73 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </TabsList>
           
           <TabsContent value="login" className="space-y-4 pt-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="font-bold">Email or Username</Label>
-                <Input id="email" placeholder="john_doe" className="rounded-xl" required />
+                <Label htmlFor="email" className="font-bold">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email"
+                  placeholder="name@example.com" 
+                  className="rounded-xl" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <Label htmlFor="pass" className="font-bold">Password</Label>
-                  <button type="button" className="text-xs text-primary font-bold hover:underline">Forgot?</button>
                 </div>
-                <Input id="pass" type="password" placeholder="••••••••" className="rounded-xl" required />
+                <Input 
+                  id="pass" 
+                  type="password" 
+                  placeholder="••••••••" 
+                  className="rounded-xl"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
-              <Button type="submit" className="w-full rounded-xl py-6 font-bold text-lg shadow-lg" disabled={loading}>
+              <Button 
+                onClick={() => handleEmailAuth('login')}
+                className="w-full rounded-xl py-6 font-bold text-lg shadow-lg" 
+                disabled={loading || !email || !password}
+              >
                 {loading ? "Authenticating..." : "Login"}
               </Button>
-            </form>
+            </div>
           </TabsContent>
 
           <TabsContent value="signup" className="space-y-4 pt-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="new-user" className="font-bold">Username</Label>
-                <Input id="new-user" placeholder="visionary_1" className="rounded-xl" required />
+                <Label htmlFor="new-email" className="font-bold">Email</Label>
+                <Input 
+                  id="new-email" 
+                  type="email"
+                  placeholder="name@example.com" 
+                  className="rounded-xl"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="new-pass" className="font-bold">Password</Label>
-                <Input id="new-pass" type="password" placeholder="••••••••" className="rounded-xl" required />
+                <Input 
+                  id="new-pass" 
+                  type="password" 
+                  placeholder="••••••••" 
+                  className="rounded-xl"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="pin" className="font-bold">Secret PIN (For Recovery)</Label>
-                <Input id="pin" placeholder="1234" maxLength={4} className="rounded-xl" required />
-              </div>
-              <Button type="submit" className="w-full rounded-xl py-6 font-bold text-lg shadow-lg" disabled={loading}>
+              <Button 
+                onClick={() => handleEmailAuth('signup')}
+                className="w-full rounded-xl py-6 font-bold text-lg shadow-lg" 
+                disabled={loading || !email || !password}
+              >
                 {loading ? "Creating Account..." : "Create Channel"}
               </Button>
-            </form>
+            </div>
           </TabsContent>
         </Tabs>
 
@@ -86,7 +127,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground font-bold">Or continue with</span></div>
         </div>
 
-        <Button variant="outline" className="w-full rounded-xl py-6 font-bold border-2 transition-all hover:bg-muted" onClick={handleSubmit}>
+        <Button 
+          variant="outline" 
+          className="w-full rounded-xl py-6 font-bold border-2 transition-all hover:bg-muted" 
+          onClick={handleGoogleSignIn}
+          disabled={loading}
+        >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
