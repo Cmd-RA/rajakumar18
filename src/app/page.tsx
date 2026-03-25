@@ -9,6 +9,7 @@ import { UploadScreen } from '@/components/screens/upload-screen';
 import { ProfileScreen } from '@/components/screens/profile-screen';
 import { DashboardScreen } from '@/components/screens/dashboard-screen';
 import { AdminScreen } from '@/components/screens/admin-screen';
+import { PolicyScreen } from '@/components/screens/policy-screen';
 import { AuthModal } from '@/components/auth/auth-modal';
 import { Toaster } from '@/components/ui/toaster';
 import { useUser } from '@/firebase';
@@ -70,6 +71,8 @@ export default function AppContainer() {
         return <DashboardScreen user={appUser} />;
       case 'ADMIN':
         return <AdminScreen />;
+      case 'POLICIES':
+        return <PolicyScreen onBack={() => setCurrentScreen('HOME')} />;
       default:
         return <HomeScreen />;
     }

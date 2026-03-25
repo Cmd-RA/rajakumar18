@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Home, PlusSquare, User, LayoutDashboard, ShieldAlert, LogOut, MessageCircle, Send } from 'lucide-react';
+import { Home, PlusSquare, User, LayoutDashboard, ShieldAlert, LogOut, MessageCircle, Send, FileText } from 'lucide-react';
 import { AppScreen, User as UserType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -41,7 +41,7 @@ export function Sidebar({ currentScreen, setScreen, user }: SidebarProps) {
         <h1 className="text-2xl font-headline font-bold tracking-tight text-primary">ChannelVista</h1>
       </div>
 
-      <nav className="flex-1 flex flex-col space-y-2">
+      <nav className="flex-1 flex flex-col space-y-2 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentScreen === item.id;
@@ -62,8 +62,21 @@ export function Sidebar({ currentScreen, setScreen, user }: SidebarProps) {
           );
         })}
         
-        {/* Mandatory Social Links */}
         <div className="pt-4 mt-4 border-t border-border">
+          <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Legal & Info</p>
+          <button
+            onClick={() => setScreen('POLICIES')}
+            className={cn(
+              "flex items-center space-x-3 px-4 py-3 rounded-xl w-full text-left transition-all",
+              currentScreen === 'POLICIES' ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted"
+            )}
+          >
+            <FileText className="w-5 h-5" />
+            <span className="font-medium text-sm">Legal Policies</span>
+          </button>
+        </div>
+
+        <div className="pt-4 mt-2">
           <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Join Channel</p>
           <a 
             href="https://whatsapp.com/channel/0029VbCRhwmJkK7DNy58uY0S" 
