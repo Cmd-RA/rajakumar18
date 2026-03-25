@@ -1,32 +1,22 @@
-# ChannelVista - Professional Photo Social Platform
+# ChannelVista - मलिक टीम (Malik Team)
 
-ChannelVista is a high-performance, mobile-first social platform for visual storytellers. It features AI-powered captioning, real-time feeds, and a built-in monetization system.
+यह वेबसाइट **राजकुमार (rajakumar18)** के लिए पूरी तरह तैयार है।
 
-## 🚀 Deployment Guide (How to go live)
+## 🚀 लाइव करने का आसान तरीका (Hindi Guide)
 
-Since I have already configured your Firebase Project (`rajakumar18`), you just need to do this:
+1. **GitHub पर डालें:** इस कोड को अपने GitHub अकाउंट पर अपलोड करें।
+2. **Firebase App Hosting:** अपने Firebase प्रोजेक्ट (`rajakumar18`) में जाएँ और **App Hosting** को GitHub से जोड़ दें।
+3. **काम खत्म:** आपकी वेबसाइट अपने आप इंटरनेट पर दिखने लगेगी।
 
-### 1. Push to GitHub
-- Create a new repository on GitHub.
-- Push this code to your repository.
+## 🛠 एडमिन कंट्रोल (मालिक के लिए)
+- **Email:** rajahribabakumar@gmail.com
+- **Phone:** +91 9682316132
 
-### 2. Connect to Firebase App Hosting
-- Go to the [Firebase Console](https://console.firebase.google.com/).
-- Select your project: **rajakumar18**.
-- Navigate to **App Hosting** and click "Get Started".
-- Connect your GitHub repository.
-- Firebase will handle the rest!
-
-### 3. Setup Environment Variables
-In the App Hosting dashboard, add:
-- `GEMINI_API_KEY`: Your Google AI API key.
-
-## 🛠 Features for the Owner (Malik)
-- **Master Admin Panel:** Use `rajahribabakumar@gmail.com` to login.
-- **System/Ads Control:** Paste your AdSense verification code directly in the Admin Panel.
-- **Live Stream:** Set a YouTube link to show at the top of the Home Feed.
-- **Monetization:** Automatic tracking for 5000 followers.
+**फीचर्स:**
+- एडसेंस (AdSense) कोड डालने का बॉक्स।
+- लाइव वीडियो बदलने का बटन।
+- यूज़र्स की शिकायतें देखने की जगह।
+- मोबाइल ऐप की तरह चलने वाला डिज़ाइन।
 
 ---
 Managed by **Malik Team**
-Contact: rajahribabakumar@gmail.com | +91 9682316132
