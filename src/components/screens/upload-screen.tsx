@@ -1,17 +1,19 @@
+
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Camera, Mic, Upload, X, Loader2, Wand2 } from 'lucide-react';
+import { Camera, Mic, Upload, X, Loader2, Wand2, ShieldAlert, Info, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { aiCaptionFromSpeech } from '@/ai/flows/ai-caption-from-speech';
 import { aiModerateCaption } from '@/ai/flows/ai-moderate-caption';
 import { AppScreen } from '@/lib/types';
 import Image from 'next/image';
 import { useFirestore, useUser, addDocumentNonBlocking } from '@/firebase';
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { collection } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 
 interface UploadScreenProps {
@@ -90,7 +92,7 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
         userId: user.uid,
         username: user.email?.split('@')[0] || 'user',
         userAvatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/200/200`,
-        photoUrl: preview, // In production, upload to Storage first
+        photoUrl: preview, 
         caption: caption,
         likesCount: 0,
         commentsCount: 0,
@@ -101,7 +103,7 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
 
       addDocumentNonBlocking(collection(firestore, 'posts'), postData);
 
-      toast({ title: "Success!", description: "Your photo is now live on ChannelVista." });
+      toast({ title: "Vision Shared!", description: "Your original photo is now live." });
       onPostCreated();
     } catch (error) {
       toast({ title: "Error", description: "Failed to upload post.", variant: "destructive" });
@@ -116,7 +118,7 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
         <button onClick={() => onNavigate('HOME')} className="p-2 hover:bg-muted rounded-full">
           <X className="w-6 h-6" />
         </button>
-        <h2 className="text-xl font-headline font-bold">New Post</h2>
+        <h2 className="text-xl font-headline font-bold">New Vision</h2>
         <Button 
           onClick={handleSubmit} 
           disabled={isUploading || !preview || !caption}
@@ -128,11 +130,29 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        
+        {/* STRICT WARNING ALERT */}
+        <Alert variant="destructive" className="rounded-2xl border-2 shadow-md">
+          <ShieldAlert className="h-5 w-5" />
+          <AlertTitle className="font-bold">Originality Required!</AlertTitle>
+          <AlertDescription className="text-xs font-medium leading-relaxed">
+            <p className="mb-2">We ONLY allow photos taken with your mobile camera. </p>
+            <p className="font-bold">❌ No Downloads / Google Photos</p>
+            <p className="font-bold">❌ No Screenshots / Copyrighted Content</p>
+            <p className="mt-2 text-[10px] opacity-80 italic">Violating users will be permanently banned from monetization.</p>
+          </AlertDescription>
+        </Alert>
+
         <div className="flex flex-col items-center">
-          <Card className="w-full max-w-sm aspect-9-16 relative overflow-hidden bg-muted group border-dashed border-2 flex items-center justify-center">
+          <Card className="w-full max-w-sm aspect-9-16 relative overflow-hidden bg-muted group border-dashed border-2 flex items-center justify-center rounded-[2rem]">
             {preview ? (
               <>
                 <Image src={preview} alt="Upload preview" fill className="object-cover" />
+                <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                  <span className="text-[10px] text-white font-bold uppercase tracking-widest flex items-center gap-1">
+                    <Smartphone className="w-3 h-3" /> Camera Shot
+                  </span>
+                </div>
                 <button 
                   onClick={() => { setFile(null); setPreview(null); }}
                   className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full backdrop-blur-md"
@@ -142,17 +162,17 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
               </>
             ) : (
               <div 
-                className="flex flex-col items-center space-y-4 cursor-pointer p-8 text-center w-full h-full justify-center"
+                className="flex flex-col items-center space-y-4 cursor-pointer p-8 text-center w-full h-full justify-center transition-all hover:bg-primary/5"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Camera className="w-8 h-8 text-primary" />
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center shadow-inner">
+                  <Camera className="w-10 h-10 text-primary" />
                 </div>
                 <div>
-                  <p className="font-bold text-lg">Upload Photo</p>
-                  <p className="text-sm text-muted-foreground">9:16 vertical images work best</p>
+                  <p className="font-bold text-xl text-primary">Capture Vision</p>
+                  <p className="text-sm text-muted-foreground mt-2 px-6">Upload an original photo from your device gallery.</p>
                 </div>
-                <Button variant="outline" size="sm" className="rounded-full">Select from device</Button>
+                <Button variant="default" size="lg" className="rounded-full px-8 shadow-xl shadow-primary/20">Select Camera Photo</Button>
               </div>
             )}
             <input 
@@ -165,29 +185,30 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
           </Card>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 bg-card p-6 rounded-[2rem] border border-border shadow-sm">
           <div className="flex items-center justify-between">
-            <h3 className="font-headline font-semibold text-lg">Caption</h3>
+            <h3 className="font-headline font-black text-lg text-primary uppercase tracking-tighter">Caption</h3>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={handleSpeechToCaption} 
               disabled={isRecording || isProcessingAI}
-              className={cn("rounded-full border-primary/50 text-primary transition-all", isRecording && "bg-destructive text-white border-destructive animate-pulse")}
+              className={cn("rounded-full border-primary/50 text-primary transition-all font-bold", isRecording && "bg-destructive text-white border-destructive animate-pulse")}
             >
               {isRecording ? <Mic className="w-4 h-4 mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
               {isRecording ? "Listening..." : "Voice Caption"}
             </Button>
           </div>
           <Textarea 
-            placeholder="Write a catchy caption for your channel..." 
-            className="min-h-[120px] rounded-2xl bg-card border-border shadow-inner text-base p-4 resize-none"
+            placeholder="Describe your original vision..." 
+            className="min-h-[140px] rounded-2xl bg-muted/20 border-border shadow-inner text-base p-4 resize-none focus:bg-background transition-colors"
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
           />
-          <p className="text-xs text-muted-foreground font-medium">
-            AI Moderation Tip: Avoid copyrighted or downloaded content. Original photos only!
-          </p>
+          <div className="flex items-start gap-2 text-[11px] text-muted-foreground font-bold p-3 bg-muted/10 rounded-xl">
+            <Info className="w-4 h-4 text-primary shrink-0" />
+            <p>Our AI analyzes metadata to verify originality. Only mobile-captured visions are eligible for monetization.</p>
+          </div>
         </div>
       </div>
     </div>
