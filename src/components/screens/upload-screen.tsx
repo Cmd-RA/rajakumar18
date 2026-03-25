@@ -8,15 +8,20 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { aiCaptionFromSpeech } from '@/ai/flows/ai-caption-from-speech';
 import { aiModerateCaption } from '@/ai/flows/ai-moderate-caption';
-import { AppScreen, Post } from '@/lib/types';
+import { AppScreen } from '@/lib/types';
 import Image from 'next/image';
+import { useFirestore, useUser, addDocumentNonBlocking } from '@/firebase';
+import { collection, serverTimestamp } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
 
 interface UploadScreenProps {
-  onPostCreated: (post: Post) => void;
+  onPostCreated: () => void;
   onNavigate: (screen: AppScreen) => void;
 }
 
 export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
+  const { firestore } = useFirestore();
+  const { user } = useUser();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
@@ -44,12 +49,10 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
     setIsRecording(true);
     toast({ title: "Recording...", description: "Speak now to generate a caption." });
     
-    // Simulate audio recording and processing
     setTimeout(async () => {
       setIsRecording(false);
       setIsProcessingAI(true);
       try {
-        // In a real app, we'd record actual audio. Simulating with a sample string for the flow.
         const mockAudioDataUri = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
         const result = await aiCaptionFromSpeech({ audioDataUri: mockAudioDataUri });
         setCaption(result.caption);
@@ -68,10 +71,14 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
       return;
     }
 
+    if (!user || !firestore) {
+      toast({ title: "Authentication Required", description: "Please login to post.", variant: "destructive" });
+      return;
+    }
+
     setIsUploading(true);
     
     try {
-      // Step 1: Moderate Caption
       const moderation = await aiModerateCaption({ caption });
       if (!moderation.isAppropriate) {
         toast({ title: "Content Flagged", description: moderation.reason || "Caption violates our policy.", variant: "destructive" });
@@ -79,22 +86,23 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
         return;
       }
 
-      // Step 2: Simulate Post Creation
-      const newPost: Post = {
-        id: Math.random().toString(36).substr(2, 9),
-        userId: 'current-user',
-        username: 'aditya_pro',
-        userAvatar: 'https://picsum.photos/seed/user1/200/200',
-        imageUrl: preview,
+      const postData = {
+        userId: user.uid,
+        username: user.email?.split('@')[0] || 'user',
+        userAvatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/200/200`,
+        photoUrl: preview, // In production, upload to Storage first
         caption: caption,
-        likes: 0,
-        comments: 0,
-        timestamp: 'Just now',
+        likesCount: 0,
+        commentsCount: 0,
+        shareCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
-      onPostCreated(newPost);
+      addDocumentNonBlocking(collection(firestore, 'posts'), postData);
+
       toast({ title: "Success!", description: "Your photo is now live on ChannelVista." });
-      onNavigate('HOME');
+      onPostCreated();
     } catch (error) {
       toast({ title: "Error", description: "Failed to upload post.", variant: "destructive" });
     } finally {
@@ -120,30 +128,21 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Photo Selection Area */}
         <div className="flex flex-col items-center">
           <Card className="w-full max-w-sm aspect-9-16 relative overflow-hidden bg-muted group border-dashed border-2 flex items-center justify-center">
             {preview ? (
               <>
                 <Image src={preview} alt="Upload preview" fill className="object-cover" />
-                <div className="absolute inset-0 border-4 border-primary/20 pointer-events-none">
-                  {/* Grid Lines for 9:16 context */}
-                  <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30 pointer-events-none">
-                    <div className="border border-white/20"></div><div className="border border-white/20"></div><div className="border border-white/20"></div>
-                    <div className="border border-white/20"></div><div className="border border-white/20"></div><div className="border border-white/20"></div>
-                    <div className="border border-white/20"></div><div className="border border-white/20"></div><div className="border border-white/20"></div>
-                  </div>
-                </div>
                 <button 
                   onClick={() => { setFile(null); setPreview(null); }}
-                  className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full backdrop-blur-md transition-opacity group-hover:opacity-100 opacity-0"
+                  className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full backdrop-blur-md"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </>
             ) : (
               <div 
-                className="flex flex-col items-center space-y-4 cursor-pointer p-8 text-center"
+                className="flex flex-col items-center space-y-4 cursor-pointer p-8 text-center w-full h-full justify-center"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
@@ -166,7 +165,6 @@ export function UploadScreen({ onPostCreated, onNavigate }: UploadScreenProps) {
           </Card>
         </div>
 
-        {/* Caption Area */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-headline font-semibold text-lg">Caption</h3>

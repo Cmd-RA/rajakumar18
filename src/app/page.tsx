@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { AppScreen, Post } from '@/lib/types';
+import { AppScreen } from '@/lib/types';
 import { BottomNav } from '@/components/navigation/bottom-nav';
 import { Sidebar } from '@/components/navigation/sidebar';
 import { HomeScreen } from '@/components/screens/home-screen';
@@ -11,41 +11,14 @@ import { DashboardScreen } from '@/components/screens/dashboard-screen';
 import { AdminScreen } from '@/components/screens/admin-screen';
 import { AuthModal } from '@/components/auth/auth-modal';
 import { Toaster } from '@/components/ui/toaster';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 
 const ADMIN_EMAIL = 'rajahribabakumar@gmail.com';
 
-const INITIAL_POSTS: Post[] = [
-  {
-    id: 'post-1',
-    userId: 'user-2',
-    username: 'travel_soul',
-    userAvatar: PlaceHolderImages.find(img => img.id === 'avatar-2')?.imageUrl || '',
-    imageUrl: PlaceHolderImages[0].imageUrl,
-    caption: 'Chasing the perfect sunset in the valley. #nature #vibes',
-    likes: 245,
-    comments: 18,
-    timestamp: '2h ago',
-  },
-  {
-    id: 'post-2',
-    userId: 'user-3',
-    username: 'urban_explorer',
-    userAvatar: PlaceHolderImages.find(img => img.id === 'avatar-3')?.imageUrl || '',
-    imageUrl: PlaceHolderImages[1].imageUrl,
-    caption: 'City lights and late nights. Architecture here is insane.',
-    likes: 120,
-    comments: 5,
-    timestamp: '5h ago',
-  },
-];
-
 export default function AppContainer() {
   const { user, isUserLoading } = useUser();
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('HOME');
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Close auth modal when user signs in
@@ -63,7 +36,6 @@ export default function AppContainer() {
     }
   }, [user, currentScreen]);
 
-  // Transfrom Firebase User to App User type
   const isAdmin = user?.email === ADMIN_EMAIL;
   
   const appUser = user ? {
@@ -72,7 +44,7 @@ export default function AppContainer() {
     displayName: user.displayName || user.email?.split('@')[0] || 'User',
     bio: 'Visual Storyteller',
     avatarUrl: user.photoURL || `https://picsum.photos/seed/${user.uid}/200/200`,
-    followerCount: isAdmin ? 15000 : 420, // Mock stats for demo
+    followerCount: isAdmin ? 15000 : 420,
     followingCount: 150,
     isMonetized: isAdmin,
     isAdmin: isAdmin,
@@ -89,23 +61,22 @@ export default function AppContainer() {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'HOME':
-        return <HomeScreen posts={posts} />;
+        return <HomeScreen />;
       case 'UPLOAD':
-        return <UploadScreen onPostCreated={(newPost) => setPosts([newPost, ...posts])} onNavigate={setCurrentScreen} />;
+        return <UploadScreen onPostCreated={() => setCurrentScreen('HOME')} onNavigate={setCurrentScreen} />;
       case 'PROFILE':
-        return <ProfileScreen user={appUser} posts={posts.filter(p => p.userId === user?.uid)} onNavigate={setCurrentScreen} />;
+        return <ProfileScreen user={appUser} onNavigate={setCurrentScreen} />;
       case 'DASHBOARD':
         return <DashboardScreen user={appUser} />;
       case 'ADMIN':
         return <AdminScreen />;
       default:
-        return <HomeScreen posts={posts} />;
+        return <HomeScreen />;
     }
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row">
-      {/* Sidebar for Desktop */}
       <div className="hidden md:block">
         <Sidebar 
           currentScreen={currentScreen} 
@@ -120,7 +91,6 @@ export default function AppContainer() {
         </div>
       </main>
 
-      {/* Bottom Nav for Mobile */}
       <div className="md:hidden">
         <BottomNav 
           currentScreen={currentScreen} 

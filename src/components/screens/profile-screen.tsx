@@ -1,22 +1,36 @@
 "use client";
 
 import React from 'react';
-import { User, Post, AppScreen } from '@/lib/types';
-import { Settings, Grid, Bookmark, Activity, MessageCircle, Send, Award, Info } from 'lucide-react';
+import { User, AppScreen } from '@/lib/types';
+import { Settings, Grid, Bookmark, Activity, MessageCircle, Send, Award, Info, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where, orderBy } from 'firebase/firestore';
 
 interface ProfileScreenProps {
   user: User | null;
-  posts: Post[];
   onNavigate: (screen: AppScreen) => void;
 }
 
-export function ProfileScreen({ user, posts, onNavigate }: ProfileScreenProps) {
+export function ProfileScreen({ user, onNavigate }: ProfileScreenProps) {
+  const { firestore } = useFirestore();
+
+  const userPostsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(
+      collection(firestore, 'posts'),
+      where('userId', '==', user.id),
+      orderBy('createdAt', 'desc')
+    );
+  }, [firestore, user]);
+
+  const { data: posts, isLoading } = useCollection(userPostsQuery);
+
   if (!user) return null;
 
   const threshold = 5000;
@@ -33,7 +47,6 @@ export function ProfileScreen({ user, posts, onNavigate }: ProfileScreenProps) {
 
       <ScrollArea className="flex-1">
         <div className="p-6 space-y-6">
-          {/* Mandatory Join Reminder */}
           <Alert className="bg-primary/10 border-primary/20 rounded-2xl">
             <Info className="h-4 w-4 text-primary" />
             <AlertTitle className="text-primary font-bold">Important Notification</AlertTitle>
@@ -50,7 +63,6 @@ export function ProfileScreen({ user, posts, onNavigate }: ProfileScreenProps) {
             </AlertDescription>
           </Alert>
 
-          {/* User Info Header */}
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="relative">
               <Avatar className="h-28 w-28 ring-4 ring-primary/20 ring-offset-4 ring-offset-background">
@@ -78,7 +90,7 @@ export function ProfileScreen({ user, posts, onNavigate }: ProfileScreenProps) {
 
             <div className="flex w-full max-w-md justify-around py-4 bg-card rounded-2xl border border-border shadow-sm">
               <div className="text-center group cursor-pointer">
-                <p className="text-xl font-headline font-bold text-primary">{posts.length}</p>
+                <p className="text-xl font-headline font-bold text-primary">{posts?.length || 0}</p>
                 <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Posts</p>
               </div>
               <div className="text-center group cursor-pointer">
@@ -102,7 +114,6 @@ export function ProfileScreen({ user, posts, onNavigate }: ProfileScreenProps) {
             </div>
           </div>
 
-          {/* Posts Grid */}
           <Tabs defaultValue="posts" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-muted rounded-xl p-1 h-12">
               <TabsTrigger value="posts" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
@@ -115,12 +126,16 @@ export function ProfileScreen({ user, posts, onNavigate }: ProfileScreenProps) {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="posts" className="pt-4">
-              {posts.length > 0 ? (
+              {isLoading ? (
+                <div className="flex justify-center py-10">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : posts && posts.length > 0 ? (
                 <div className="grid grid-cols-3 gap-2">
                   {posts.map((post) => (
                     <div key={post.id} className="aspect-9-16 relative bg-muted rounded-lg overflow-hidden group">
                       <Image 
-                        src={post.imageUrl} 
+                        src={post.photoUrl || post.imageUrl} 
                         alt={post.caption} 
                         fill 
                         className="object-cover transition-transform group-hover:scale-105" 
