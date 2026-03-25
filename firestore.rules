@@ -22,6 +22,11 @@ service cloud.firestore {
       allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
+    match /complaints/{complaintId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
     match /settings/site_config {
       allow read: if true;
       allow write: if isAdmin();

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Trash2, Ban, Video, Save, Send, Bell, Settings, LayoutGrid, Code, Activity, RefreshCw } from 'lucide-react';
+import { ShieldAlert, Trash2, Ban, Video, Save, Send, Bell, Settings, LayoutGrid, Code, Activity, RefreshCw, MessageSquare, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useFirestore, setDocumentNonBlocking, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore, setDocumentNonBlocking, useDoc, useMemoFirebase, useCollection, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
+import { doc, collection, query, orderBy } from 'firebase/firestore';
 
 export function AdminScreen() {
   const { firestore } = useFirestore();
@@ -30,6 +30,14 @@ export function AdminScreen() {
   }, [firestore]);
 
   const { data: config, isLoading: isConfigLoading } = useDoc(configRef);
+
+  // Fetch user complaints
+  const complaintsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'complaints'), orderBy('createdAt', 'desc'));
+  }, [firestore]);
+
+  const { data: complaints, isLoading: isComplaintsLoading } = useCollection(complaintsQuery);
 
   useEffect(() => {
     if (config) {
@@ -56,6 +64,20 @@ export function AdminScreen() {
     }, 1000);
   };
 
+  const handleResolveComplaint = (id: string) => {
+    if (!firestore) return;
+    const ref = doc(firestore, 'complaints', id);
+    updateDocumentNonBlocking(ref, { status: 'resolved' });
+    toast({ title: "Complaint Marked as Resolved" });
+  };
+
+  const handleDeleteComplaint = (id: string) => {
+    if (!firestore) return;
+    const ref = doc(firestore, 'complaints', id);
+    deleteDocumentNonBlocking(ref);
+    toast({ title: "Complaint Deleted" });
+  };
+
   const flaggedPosts = [
     { id: 'f1', user: 'bot_test', reason: 'Possible spam', date: '10m ago' },
     { id: 'f2', user: 'unoriginal_01', reason: 'Copyright violation', date: '1h ago' },
@@ -76,11 +98,12 @@ export function AdminScreen() {
       <ScrollArea className="flex-1">
         <div className="p-6 space-y-6">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-6 h-12 rounded-xl bg-muted p-1">
-              <TabsTrigger value="overview" className="rounded-lg font-bold">Dashboard</TabsTrigger>
-              <TabsTrigger value="notifications" className="rounded-lg font-bold">Broadcast</TabsTrigger>
-              <TabsTrigger value="moderation" className="rounded-lg font-bold">Moderation</TabsTrigger>
-              <TabsTrigger value="settings" className="rounded-lg font-bold">System/Ads</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-5 mb-6 h-12 rounded-xl bg-muted p-1">
+              <TabsTrigger value="overview" className="rounded-lg font-bold text-[10px] sm:text-xs">Dashboard</TabsTrigger>
+              <TabsTrigger value="support" className="rounded-lg font-bold text-[10px] sm:text-xs">Support</TabsTrigger>
+              <TabsTrigger value="notifications" className="rounded-lg font-bold text-[10px] sm:text-xs">Broadcast</TabsTrigger>
+              <TabsTrigger value="moderation" className="rounded-lg font-bold text-[10px] sm:text-xs">Moderation</TabsTrigger>
+              <TabsTrigger value="settings" className="rounded-lg font-bold text-[10px] sm:text-xs">System/Ads</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -124,6 +147,69 @@ export function AdminScreen() {
                     </div>
                   </div>
                 </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="support" className="space-y-6">
+              <Card className="rounded-2xl shadow-md overflow-hidden">
+                <CardHeader className="bg-primary/5 border-b border-primary/10">
+                  <CardTitle className="text-lg font-headline font-bold flex items-center">
+                    <MessageSquare className="w-5 h-5 mr-2 text-primary" />
+                    Customer Support Tickets
+                  </CardTitle>
+                  <CardDescription className="font-medium">View and manage user complaints and requests.</CardDescription>
+                </CardHeader>
+                <ScrollArea className="h-[500px]">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead className="font-bold">User</TableHead>
+                        <TableHead className="font-bold">Complaint</TableHead>
+                        <TableHead className="font-bold">Status</TableHead>
+                        <TableHead className="text-right font-bold">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {isComplaintsLoading ? (
+                        <TableRow><TableCell colSpan={4} className="text-center py-10"><RefreshCw className="w-6 h-6 animate-spin mx-auto text-primary" /></TableCell></TableRow>
+                      ) : complaints && complaints.length > 0 ? (
+                        complaints.map((c) => (
+                          <TableRow key={c.id} className="hover:bg-muted/30">
+                            <TableCell className="font-bold">@{c.username}</TableCell>
+                            <TableCell className="max-w-xs"><p className="text-xs truncate" title={c.message}>{c.message}</p></TableCell>
+                            <TableCell>
+                              <Badge variant={c.status === 'pending' ? 'destructive' : 'default'} className="rounded-md">
+                                {c.status.toUpperCase()}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right space-x-1">
+                              {c.status === 'pending' && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="text-green-600 hover:bg-green-50"
+                                  onClick={() => handleResolveComplaint(c.id)}
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                </Button>
+                              )}
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-destructive hover:bg-destructive/5"
+                                onClick={() => handleDeleteComplaint(c.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-medium">No support tickets found.</TableCell></TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               </Card>
             </TabsContent>
 

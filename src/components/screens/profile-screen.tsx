@@ -1,16 +1,20 @@
+
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { User, AppScreen } from '@/lib/types';
-import { Settings, Grid, Bookmark, Activity, MessageCircle, Send, Award, Info, Loader2 } from 'lucide-react';
+import { Settings, Grid, Bookmark, Activity, MessageCircle, Send, Award, Info, Loader2, LifeBuoy } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProfileScreenProps {
   user: User | null;
@@ -19,6 +23,10 @@ interface ProfileScreenProps {
 
 export function ProfileScreen({ user, onNavigate }: ProfileScreenProps) {
   const { firestore } = useFirestore();
+  const { toast } = useToast();
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [complaintMsg, setComplaintMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const userPostsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -35,6 +43,27 @@ export function ProfileScreen({ user, onNavigate }: ProfileScreenProps) {
 
   const threshold = 5000;
   const isEligible = user.followerCount >= threshold;
+
+  const handleSubmitComplaint = () => {
+    if (!complaintMsg.trim() || !firestore) return;
+    setIsSubmitting(true);
+    
+    addDocumentNonBlocking(collection(firestore, 'complaints'), {
+      userId: user.id,
+      username: user.username,
+      message: complaintMsg,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    }).then(() => {
+      setIsSubmitting(false);
+      setIsSupportOpen(false);
+      setComplaintMsg('');
+      toast({
+        title: "Complaint Received",
+        description: "Our team will review your message soon.",
+      });
+    });
+  };
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -110,7 +139,13 @@ export function ProfileScreen({ user, onNavigate }: ProfileScreenProps) {
               >
                 Dashboard
               </Button>
-              <Button variant="outline" className="flex-1 rounded-xl border-primary/20">Edit Profile</Button>
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-xl border-primary/20 flex items-center gap-2"
+                onClick={() => setIsSupportOpen(true)}
+              >
+                <LifeBuoy className="w-4 h-4" /> Support
+              </Button>
             </div>
           </div>
 
@@ -158,6 +193,35 @@ export function ProfileScreen({ user, onNavigate }: ProfileScreenProps) {
           </Tabs>
         </div>
       </ScrollArea>
+
+      <Dialog open={isSupportOpen} onOpenChange={setIsSupportOpen}>
+        <DialogContent className="rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="font-headline font-bold">Contact Customer Support</DialogTitle>
+            <DialogDescription className="font-medium">
+              Having issues with your account or monetization? Send us a message and the Malik team will assist you.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Textarea 
+              placeholder="Describe your problem or feedback..." 
+              className="min-h-[150px] rounded-2xl p-4 bg-muted/20"
+              value={complaintMsg}
+              onChange={(e) => setComplaintMsg(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button 
+              className="w-full rounded-xl py-6 font-bold" 
+              onClick={handleSubmitComplaint}
+              disabled={isSubmitting || !complaintMsg.trim()}
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Submit Complaint
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
