@@ -1,391 +1,45 @@
+
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a user account and their personal channel on the ChannelVista platform.",
+      "description": "Represents a user account and their personal channel.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the User entity."
-        },
-        "username": {
-          "type": "string",
-          "description": "Unique username chosen by the user for their channel."
-        },
-        "email": {
-          "type": "string",
-          "description": "User's email address.",
-          "format": "email"
-        },
-        "profilePhotoUrl": {
-          "type": "string",
-          "description": "URL to the user's profile picture.",
-          "format": "uri"
-        },
-        "bio": {
-          "type": "string",
-          "description": "A short biography or description provided by the user."
-        },
-        "secretPinHash": {
-          "type": "string",
-          "description": "Hashed version of the secret PIN used for account recovery (e.g., forgot password)."
-        },
-        "followersCount": {
-          "type": "number",
-          "description": "Denormalized count of followers for this user's channel."
-        },
-        "followingCount": {
-          "type": "number",
-          "description": "Denormalized count of channels this user is following."
-        },
-        "postsCount": {
-          "type": "number",
-          "description": "Denormalized count of posts made by this user."
-        },
-        "isAdmin": {
-          "type": "boolean",
-          "description": "Flag indicating if the user has administrator privileges."
-        },
-        "isBlocked": {
-          "type": "boolean",
-          "description": "Flag indicating if the user account has been blocked by an administrator."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp when the user account was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp when the user account was last updated.",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "isAdmin": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "username",
-        "email",
-        "secretPinHash",
-        "followersCount",
-        "followingCount",
-        "postsCount",
-        "isAdmin",
-        "isBlocked",
-        "createdAt",
-        "updatedAt"
-      ]
+      "required": ["id", "username", "email", "isAdmin"]
     },
     "Post": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Post",
       "type": "object",
-      "description": "Represents a single photo post uploaded by a user.",
+      "description": "Represents a photo post.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Post entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the User who created this post. (Relationship: User 1:N Post)"
-        },
-        "photoUrl": {
-          "type": "string",
-          "description": "URL to the uploaded and optimized photo for the post.",
-          "format": "uri"
-        },
-        "caption": {
-          "type": "string",
-          "description": "The text caption accompanying the photo post."
-        },
-        "likesCount": {
-          "type": "number",
-          "description": "Denormalized count of likes received on this post."
-        },
-        "commentsCount": {
-          "type": "number",
-          "description": "Denormalized count of comments received on this post."
-        },
-        "shareCount": {
-          "type": "number",
-          "description": "Denormalized count of shares for this post."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp when the post was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp when the post was last updated.",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "caption": { "type": "string" },
+        "likesCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "userId",
-        "photoUrl",
-        "caption",
-        "likesCount",
-        "commentsCount",
-        "shareCount",
-        "createdAt",
-        "updatedAt"
-      ]
+      "required": ["id", "userId", "photoUrl", "caption", "likesCount", "createdAt"]
     },
-    "Comment": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Comment",
+    "SiteSettings": {
+      "title": "SiteSettings",
       "type": "object",
-      "description": "Represents a comment made by a user on a specific post.",
+      "description": "Global site configurations like AdSense code and Meta tags.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Comment entity."
-        },
-        "postId": {
-          "type": "string",
-          "description": "Reference to the Post this comment belongs to. (Relationship: Post 1:N Comment)"
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the User who made this comment. (Relationship: User 1:N Comment)"
-        },
-        "content": {
-          "type": "string",
-          "description": "The text content of the comment."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp when the comment was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp when the comment was last updated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "postId",
-        "userId",
-        "content",
-        "createdAt",
-        "updatedAt"
-      ]
-    },
-    "Like": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Like",
-      "type": "object",
-      "description": "Records a user's 'like' action on a post.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Like entity."
-        },
-        "postId": {
-          "type": "string",
-          "description": "Reference to the Post that was liked. (Relationship: Post 1:N Like)"
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the User who performed the like action. (Relationship: User 1:N Like)"
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp when the like was created.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "postId",
-        "userId",
-        "createdAt"
-      ]
-    },
-    "Follow": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Follow",
-      "type": "object",
-      "description": "Records a relationship where one user is following another user's channel.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Follow relationship."
-        },
-        "followerId": {
-          "type": "string",
-          "description": "Reference to the User who is following. (Relationship: User 1:N Follow)"
-        },
-        "followingId": {
-          "type": "string",
-          "description": "Reference to the User who is being followed. (Relationship: User 1:N Follow)"
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp when the follow relationship was established.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "followerId",
-        "followingId",
-        "createdAt"
-      ]
-    },
-    "Monetization": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Monetization",
-      "type": "object",
-      "description": "Stores monetization-related data for a user's channel, including eligibility and earnings.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Monetization entry."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the User whose monetization data this record represents. (Relationship: User 1:1 Monetization)"
-        },
-        "isEligible": {
-          "type": "boolean",
-          "description": "Flag indicating if the user has met the criteria (e.g., 5000 followers) for monetization."
-        },
-        "totalEarnings": {
-          "type": "number",
-          "description": "The cumulative total earnings for the user's channel."
-        },
-        "earningsLastMonth": {
-          "type": "number",
-          "description": "The total earnings generated by the user's channel in the previous calendar month."
-        },
-        "lastUpdated": {
-          "type": "string",
-          "description": "Timestamp when the monetization data was last updated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "isEligible",
-        "totalEarnings",
-        "earningsLastMonth",
-        "lastUpdated"
-      ]
-    },
-    "LiveVideo": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "LiveVideo",
-      "type": "object",
-      "description": "Represents a live video scheduled and streamed by an administrator.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the LiveVideo entity."
-        },
-        "adminId": {
-          "type": "string",
-          "description": "Reference to the User (who must be an admin) that created or scheduled this live video. (Relationship: User 1:N LiveVideo)"
-        },
-        "title": {
-          "type": "string",
-          "description": "Title of the live video event."
-        },
-        "description": {
-          "type": "string",
-          "description": "A brief description of the live video content."
-        },
-        "youtubeEmbedUrl": {
-          "type": "string",
-          "description": "The embeddable URL for the YouTube live stream.",
-          "format": "uri"
-        },
-        "scheduledTime": {
-          "type": "string",
-          "description": "The date and time when the live video is scheduled to occur.",
-          "format": "date-time"
-        },
-        "isLive": {
-          "type": "boolean",
-          "description": "Flag indicating if the live video is currently active/streaming."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp when the live video entry was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp when the live video entry was last updated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "adminId",
-        "title",
-        "youtubeEmbedUrl",
-        "scheduledTime",
-        "isLive",
-        "createdAt",
-        "updatedAt"
-      ]
-    },
-    "StaticPage": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "StaticPage",
-      "type": "object",
-      "description": "Stores content for static pages such as Privacy Policy, Terms & Conditions, About Us, and Contact Us, which are crucial for AdSense approval.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the StaticPage entity."
-        },
-        "pageName": {
-          "type": "string",
-          "description": "The human-readable name of the static page (e.g., 'Privacy Policy')."
-        },
-        "slug": {
-          "type": "string",
-          "description": "A URL-friendly unique identifier for the page (e.g., 'privacy-policy')."
-        },
-        "content": {
-          "type": "string",
-          "description": "The full content of the static page, typically in HTML or Markdown format."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp when the static page content was initially created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp when the static page content was last updated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "pageName",
-        "slug",
-        "content",
-        "createdAt",
-        "updatedAt"
-      ]
+        "adsenseCode": { "type": "string", "description": "The script or meta tag provided by Google AdSense." },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
+    "providers": ["google", "password"]
   },
   "firestore": {
     "structure": [
@@ -393,155 +47,30 @@
         "path": "/users/{userId}",
         "definition": {
           "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profile information, including public details and private attributes. Publicly readable. Only the user themselves or an admin can update their profile. Includes denormalized counts for followers, following, and posts.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user, matching `request.auth.uid` for ownership."
-            }
-          ]
+          "description": "Public user profiles."
         }
       },
       {
         "path": "/posts/{postId}",
         "definition": {
           "entityName": "Post",
-          "schema": {
-            "$ref": "#/backend/entities/Post"
-          },
-          "description": "Stores public photo posts made by users. Anyone can read. Only the post owner (`resource.data.userId`) or an administrator can create, update, or delete posts. Includes denormalized counts for likes, comments, and shares.",
-          "params": [
-            {
-              "name": "postId",
-              "description": "The unique identifier for the post."
-            }
-          ]
+          "description": "Public photo posts."
         }
       },
       {
-        "path": "/posts/{postId}/comments/{commentId}",
+        "path": "/settings/site_config",
         "definition": {
-          "entityName": "Comment",
-          "schema": {
-            "$ref": "#/backend/entities/Comment"
-          },
-          "description": "Stores comments associated with a specific post. Anyone can read. Any authenticated user can create. Only the commenter (`resource.data.userId`), the post owner (implicitly via parent `postId` and potentially denormalized `postOwnerId` in rules), or an administrator can modify/delete. Includes denormalized `postId` and `userId` for authorization independence.",
-          "params": [
-            {
-              "name": "postId",
-              "description": "The unique identifier of the parent post."
-            },
-            {
-              "name": "commentId",
-              "description": "The unique identifier for the comment."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/posts/{postId}/likes/{userId}",
-        "definition": {
-          "entityName": "Like",
-          "schema": {
-            "$ref": "#/backend/entities/Like"
-          },
-          "description": "Records a user's 'like' on a specific post. The document ID is the `userId` to enforce one like per user per post. Anyone can read the existence (for counting), but only the liking user (`request.auth.uid == userId`) can create or delete their own like. Includes denormalized `postId` and `userId` for authorization independence.",
-          "params": [
-            {
-              "name": "postId",
-              "description": "The unique identifier of the parent post."
-            },
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who performed the like action (used as the document ID)."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/follows/{followId}",
-        "definition": {
-          "entityName": "Follow",
-          "schema": {
-            "$ref": "#/backend/entities/Follow"
-          },
-          "description": "Stores follow relationships between users as a top-level collection. Document ID could be a composite of `followerId_followingId`. Only the `followerId` matching `request.auth.uid` can create or delete their own follow relationship. Includes denormalized `followerId` and `followingId` for authorization independence and efficient querying for counts.",
-          "params": [
-            {
-              "name": "followId",
-              "description": "A unique identifier for the follow relationship (e.g., a composite ID like `followerId_followingId`)."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/monetization",
-        "definition": {
-          "entityName": "Monetization",
-          "schema": {
-            "$ref": "#/backend/entities/Monetization"
-          },
-          "description": "Stores private monetization data for a specific user. This is a 1:1 subcollection of the user's profile, with a single document. Only accessible (read/write) by the owner user (`userId` in path) or an administrator. Includes denormalized `userId` for ownership and authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user whose monetization data is stored here."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/live_videos/{liveVideoId}",
-        "definition": {
-          "entityName": "LiveVideo",
-          "schema": {
-            "$ref": "#/backend/entities/LiveVideo"
-          },
-          "description": "Stores information about live video streams scheduled and managed by administrators. Publicly readable by all users. Only administrators can create, update, or delete these entries. Includes `adminId` for creator reference and authorization.",
-          "params": [
-            {
-              "name": "liveVideoId",
-              "description": "The unique identifier for the live video."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/static_pages/{pageSlug}",
-        "definition": {
-          "entityName": "StaticPage",
-          "schema": {
-            "$ref": "#/backend/entities/StaticPage"
-          },
-          "description": "Stores content for static pages such as Privacy Policy, Terms & Conditions, and About Us. Publicly readable by all users. Only administrators can create, update, or delete these entries. The document ID is the URL-friendly `slug` of the page.",
-          "params": [
-            {
-              "name": "pageSlug",
-              "description": "The URL-friendly slug that uniquely identifies the static page (e.g., 'privacy-policy')."
-            }
-          ]
+          "entityName": "SiteSettings",
+          "description": "Global settings for SEO and AdSense. Only admin can write."
         }
       },
       {
         "path": "/roles_admin/{userId}",
         "definition": {
           "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "A dedicated top-level collection for administrative role assignments. A document exists here if the `userId` corresponds to an administrator. This allows for atomic `get(/roles_admin/$(request.auth.uid)).exists()` checks in security rules to determine admin status, promoting Authorization Independence. Documents can be empty or contain minimal data.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who has been assigned an administrative role."
-            }
-          ]
+          "description": "Admin role assignment collection."
         }
       }
-    ],
-    "reasoning": "The Firestore structure prioritizes security, scalability, and debuggability by strictly adhering to the core design principles and strategy mandates.Authorization Independence is a critical aspect achieved through calculated denormalization. For subcollections like 'comments' and 'likes' within 'posts', the relevant `userId` and `postId` are explicitly included within the document itself. This eliminates the need for expensive and non-atomic `get()` operations in security rules to check parent document attributes for authorization. For instance, a comment's ownership can be verified directly from `resource.data.userId` without querying the parent post. The 'likes' collection uses the `userId` as the document ID (`/posts/{postId}/likes/{userId}`), making the liking user's identity immediately available in the path, further simplifying authorization without `get()` calls.\n\nTo support QAPs (Rules are not Filters) and ensure secure `list` operations, the design employs robust Structural Segregation:\n1.  **Public Data:** Collections like `/posts`, `/live_videos`, and `/static_pages` are designed to hold publicly readable content. Any `list` operation on these collections will, by design, only return data intended for public consumption, preventing accidental exposure of private information through rule misconfigurations. Write access to these collections is strictly managed based on `userId` (for posts) or admin roles.\n2.  **Private User Data:** Sensitive user-specific information, such as monetization details, is nested within user-specific paths: `/users/{userId}/monetization`. This path-based ownership (`request.auth.uid == userId`) provides inherent security. A `list` query on `/users/{userId}/monetization` will automatically be scoped to the authenticated user's private data, making it impossible to query other users' monetization data through a simple `list`.\n3.  **Role-Based Access Control (DBAC):** Admin roles are handled via a dedicated top-level collection `/roles_admin/{userId}`. This 'existence over content' approach allows for atomic and explicit checks (`get(/roles_admin/$(request.auth.uid)).exists()`) in security rules to grant admin privileges, rather than relying on `isAdmin` fields within individual user profiles, which could be less performant or harder to secure in complex scenarios. This segregated collection also simplifies `list` operations for admins, as only admin UIDs are present.\n\nOverall, the architecture uses consistent naming conventions (e.g., `userId`, `postId`), leverages hierarchical paths for user-owned 1:N data, and employs a flat collection for relationships (`/follows`) to optimize query patterns and security rule enforcement. This comprehensive approach results in a highly secure, scalable, and easily auditable Firestore database."
+    ]
   }
 }

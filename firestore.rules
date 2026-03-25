@@ -1,175 +1,35 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * CHANNELVISTA SECURITY RULES PHILOSOPHY
-     *
-     * Core Philosophy:
-     * This ruleset implements a robust, owner-centric security model with high-level administrative
-     * overrides. It prioritizes Authorization Independence by ensuring that all documents contain
-     * the necessary fields (like userId or followerId) to make access decisions without expensive
-     * cross-document lookups.
-     *
-     * Data Structure:
-     * - /users/{userId}: Public profiles with owner-restricted updates.
-     * - /posts/{postId}: Publicly viewable content; creation and management restricted to the author.
-     * - /posts/{postId}/comments: Publicly viewable; creation restricted to authenticated users.
-     * - /users/{userId}/monetization: Strictly private data accessible only by the owner or admins.
-     * - /roles_admin: A high-integrity collection used to identify system administrators.
-     *
-     * Key Security Decisions:
-     * 1. Structural Segregation: Private monetization data is nested under the user path to enforce
-     *    inherent privacy through path-based rules.
-     * 2. DBAC (Database-level Access Control): Admin status is verified by checking for a document
-     *    existence in the `/roles_admin` collection, ensuring atomic and performant privilege checks.
-     * 3. Prototyping Flexibility: Rules enforce WHO can access data but do NOT enforce the exact
-     *    shape or types of general content fields to allow for rapid development iterations.
-     */
-
-    // --- HELPER FUNCTIONS ---
-
-    /** @description Checks if the request is from an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the authenticated user's UID matches the provided userId. */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /** @description Verifies the document exists and the requester is the owner. */
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    /** @description Checks if the authenticated user is registered in the admin roles collection. */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    // --- COLLECTION RULES ---
-
-    /**
-     * @description Rules for the User collection. Profiles are public, but only owners or admins can edit.
-     * @path /users/{userId}
-     * @allow (get) Any user requesting a specific profile.
-     * @deny (update) A user attempting to change another user's bio.
-     * @principle Path-based ownership and relational integrity via ID validation.
-     */
     match /users/{userId} {
-      allow get, list: if true;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if (isExistingOwner(userId) || isAdmin()) && request.resource.data.id == resource.data.id;
-      allow delete: if isAdmin();
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * @description Private monetization data nested under the user.
-     * @path /users/{userId}/monetization/{docId}
-     * @allow (list) An owner viewing their own earnings statistics.
-     * @deny (get) A user trying to view another user's 'isEligible' status.
-     * @principle Structural segregation of private data.
-     */
-    match /users/{userId}/monetization/{docId} {
-      allow get, list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if (isExistingOwner(userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isAdmin();
-    }
-
-    /**
-     * @description Public posts. Authorship is verified via denormalized userId.
-     * @path /posts/{postId}
-     * @allow (create) An authenticated user uploading a photo with their own userId.
-     * @deny (delete) A user attempting to delete a post they did not create.
-     * @principle Owner-only writes with public read access.
-     */
     match /posts/{postId} {
-      allow get, list: if true;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if (isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin())) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
-    /**
-     * @description Comments on posts. Owners can UD their own, admins can UD any.
-     * @path /posts/{postId}/comments/{commentId}
-     * @allow (create) Any signed-in user contributing to a discussion.
-     * @deny (update) Changing the content of someone else's comment.
-     * @principle Authorization independence using denormalized userId on the comment.
-     */
-    match /posts/{postId}/comments/{commentId} {
-      allow get, list: if true;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if (isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin())) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    match /settings/site_config {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
-    /**
-     * @description Likes collection. Uses userId as docId to enforce unique likes per user.
-     * @path /posts/{postId}/likes/{userId}
-     * @allow (create) A user liking a post where the docId matches their UID.
-     * @deny (create) A user attempting to 'like' on behalf of another user.
-     * @principle Identity verification via path parameters.
-     */
-    match /posts/{postId}/likes/{userId} {
-      allow get, list: if true;
-      allow create: if isOwner(userId);
-      allow update: if false;
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description Global follow relationships.
-     * @path /follows/{followId}
-     * @allow (create) A user following another channel.
-     * @deny (delete) A user trying to 'unfollow' for someone else.
-     * @principle Validates that the followerId in the data matches the authenticated requester.
-     */
-    match /follows/{followId} {
-      allow get, list: if true;
-      allow create: if isSignedIn() && request.resource.data.followerId == request.auth.uid;
-      allow update: if false;
-      allow delete: if isSignedIn() && (resource.data.followerId == request.auth.uid || isAdmin());
-    }
-
-    /**
-     * @description Administrator-managed live video events.
-     * @path /live_videos/{liveVideoId}
-     * @allow (get) A visitor viewing scheduled live streams.
-     * @deny (create) A standard user attempting to create a live video entry.
-     * @principle Admin-only management of public announcements.
-     */
-    match /live_videos/{liveVideoId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    /**
-     * @description Static content for legal and informational pages.
-     * @path /static_pages/{pageSlug}
-     * @allow (list) The frontend fetching all available legal pages.
-     * @deny (update) A non-admin attempting to modify the Privacy Policy.
-     * @principle Public consumption with restricted administrative maintenance.
-     */
-    match /static_pages/{pageSlug} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    /**
-     * @description Internal collection defining which users are admins.
-     * @path /roles_admin/{userId}
-     * @allow (get) Any user checking if they have admin status.
-     * @deny (list) A standard user listing all system administrators.
-     * @principle Role-Based Access Control (RBAC) via existence checks.
-     */
     match /roles_admin/{userId} {
-      allow get: if isSignedIn();
-      allow list: if isAdmin();
-      allow create, update, delete: if false;
+      allow read: if isSignedIn();
+      allow write: if false;
     }
   }
 }

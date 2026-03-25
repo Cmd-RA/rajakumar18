@@ -1,6 +1,8 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { SEOInjector } from '@/components/seo-injector';
 
 export const metadata: Metadata = {
   title: 'ChannelVista - Photo Social Platform',
@@ -21,6 +23,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <FirebaseClientProvider>
+          <SEOInjector />
           {children}
         </FirebaseClientProvider>
       </body>
