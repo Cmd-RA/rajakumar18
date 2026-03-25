@@ -80,11 +80,6 @@ export function AdminScreen() {
     toast({ title: "Complaint Deleted" });
   };
 
-  const flaggedPosts = [
-    { id: 'f1', user: 'bot_test', reason: 'Possible spam', date: '10m ago' },
-    { id: 'f2', user: 'unoriginal_01', reason: 'Copyright violation', date: '1h ago' },
-  ];
-
   return (
     <div className="flex flex-col h-full bg-background">
       <header className="p-4 border-b border-border bg-card flex justify-between items-center sticky top-0 z-10 shadow-sm">
@@ -92,9 +87,9 @@ export function AdminScreen() {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
             <ShieldAlert className="w-5 h-5 text-primary-foreground" />
           </div>
-          <h2 className="text-xl font-headline font-bold">Owner Control Panel</h2>
+          <h2 className="text-xl font-headline font-bold">Malik Master Control</h2>
         </div>
-        <Badge variant="outline" className="font-bold border-primary text-primary bg-primary/5 px-3 py-1">Master Admin</Badge>
+        <Badge variant="outline" className="font-bold border-primary text-primary bg-primary/5 px-3 py-1">Owner Access</Badge>
       </header>
 
       <ScrollArea className="flex-1">
@@ -102,10 +97,10 @@ export function AdminScreen() {
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="grid w-full grid-cols-5 mb-6 h-12 rounded-xl bg-muted p-1">
               <TabsTrigger value="overview" className="rounded-lg font-bold text-[10px] sm:text-xs">Dashboard</TabsTrigger>
-              <TabsTrigger value="support" className="rounded-lg font-bold text-[10px] sm:text-xs">Support</TabsTrigger>
+              <TabsTrigger value="support" className="rounded-lg font-bold text-[10px] sm:text-xs">Complaints</TabsTrigger>
               <TabsTrigger value="notifications" className="rounded-lg font-bold text-[10px] sm:text-xs">Broadcast</TabsTrigger>
-              <TabsTrigger value="moderation" className="rounded-lg font-bold text-[10px] sm:text-xs">Moderation</TabsTrigger>
-              <TabsTrigger value="settings" className="rounded-lg font-bold text-[10px] sm:text-xs">System/Ads</TabsTrigger>
+              <TabsTrigger value="moderation" className="rounded-lg font-bold text-[10px] sm:text-xs">Posts</TabsTrigger>
+              <TabsTrigger value="settings" className="rounded-lg font-bold text-[10px] sm:text-xs">AdSense/SEO</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -119,8 +114,8 @@ export function AdminScreen() {
                   <p className="text-2xl font-headline font-bold text-green-600">$1,420</p>
                 </Card>
                 <Card className="p-4 rounded-2xl bg-card border-l-4 border-accent shadow-sm">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Live Visions</p>
-                  <p className="text-2xl font-headline font-bold text-accent">342</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Open Tickets</p>
+                  <p className="text-2xl font-headline font-bold text-accent">{complaints?.filter(c => c.status === 'pending').length || 0}</p>
                 </Card>
                 <Card className="p-4 rounded-2xl bg-card border-l-4 border-destructive shadow-sm">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Flagged Posts</p>
@@ -134,11 +129,11 @@ export function AdminScreen() {
                     <Video className="w-5 h-5 mr-2 text-primary" />
                     Live Streaming Manager
                   </CardTitle>
-                  <CardDescription className="font-medium">Update the featured live video link for all users.</CardDescription>
+                  <CardDescription className="font-medium">Update the top-rank live video for all vision channels.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                   <div className="space-y-2">
-                    <p className="text-sm font-bold text-muted-foreground">Video Embed URL (YouTube/Vimeo)</p>
+                    <p className="text-sm font-bold text-muted-foreground">YouTube/Vimeo Embed URL</p>
                     <div className="flex space-x-2">
                       <Input 
                         placeholder="https://www.youtube.com/watch?v=..." 
@@ -147,10 +142,9 @@ export function AdminScreen() {
                         className="rounded-xl h-12"
                       />
                       <Button onClick={handleUpdateConfig} disabled={isSaving} className="rounded-xl px-6 h-12">
-                        {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Save Link"}
+                        {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Set Live"}
                       </Button>
                     </div>
-                    <p className="text-[10px] text-muted-foreground italic">Tip: Paste a regular YouTube link, the system will automatically format it for the player.</p>
                   </div>
                 </CardContent>
               </Card>
@@ -161,18 +155,18 @@ export function AdminScreen() {
                 <CardHeader className="bg-primary/5 border-b border-primary/10">
                   <CardTitle className="text-lg font-headline font-bold flex items-center">
                     <MessageSquare className="w-5 h-5 mr-2 text-primary" />
-                    Customer Support Tickets
+                    Customer Support Dashboard
                   </CardTitle>
-                  <CardDescription className="font-medium">View and manage user complaints and requests.</CardDescription>
+                  <CardDescription className="font-medium">Manage user feedback and monetization complaints.</CardDescription>
                 </CardHeader>
                 <ScrollArea className="h-[500px]">
                   <Table>
                     <TableHeader className="bg-muted/50">
                       <TableRow>
                         <TableHead className="font-bold">User</TableHead>
-                        <TableHead className="font-bold">Complaint</TableHead>
+                        <TableHead className="font-bold">Message</TableHead>
                         <TableHead className="font-bold">Status</TableHead>
-                        <TableHead className="text-right font-bold">Actions</TableHead>
+                        <TableHead className="text-right font-bold">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -211,58 +205,11 @@ export function AdminScreen() {
                           </TableRow>
                         ))
                       ) : (
-                        <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-medium">No support tickets found.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-medium">No complaints found.</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
                 </ScrollArea>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="notifications" className="space-y-6">
-              <Card className="rounded-2xl shadow-md p-6 space-y-4">
-                <CardHeader className="p-0 mb-2">
-                  <CardTitle className="text-lg font-headline font-bold flex items-center">
-                    <Bell className="w-5 h-5 mr-2 text-accent" />
-                    Global Community Broadcast
-                  </CardTitle>
-                  <CardDescription className="font-medium">Send a notification to all users across the platform.</CardDescription>
-                </CardHeader>
-                <Textarea 
-                  className="rounded-2xl min-h-[150px] bg-muted/20 p-4"
-                  placeholder="Example: Mandatory Update! Join our WhatsApp channel for monetization payouts..."
-                  value={notificationMsg}
-                  onChange={(e) => setNotificationMsg(e.target.value)}
-                />
-                <Button onClick={() => toast({title: "Broadcast Sent!"})} className="w-full rounded-xl py-7 font-bold text-lg shadow-lg shadow-accent/20">
-                  <Send className="w-5 h-5 mr-2" /> Send Global Notification
-                </Button>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="moderation" className="space-y-6">
-              <Card className="rounded-2xl shadow-md overflow-hidden border-destructive/20">
-                <Table>
-                  <TableHeader className="bg-destructive/5">
-                    <TableRow>
-                      <TableHead className="font-bold">User</TableHead>
-                      <TableHead className="font-bold">Reason</TableHead>
-                      <TableHead className="text-right font-bold">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {flaggedPosts.map((post) => (
-                      <TableRow key={post.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">@{post.user}</TableCell>
-                        <TableCell><Badge variant="destructive" className="rounded-md">{post.reason}</Badge></TableCell>
-                        <TableCell className="text-right space-x-2">
-                          <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"><Trash2 className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" className="hover:bg-muted"><Ban className="w-4 h-4" /></Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
               </Card>
             </TabsContent>
 
@@ -271,12 +218,12 @@ export function AdminScreen() {
                 <CardHeader className="bg-accent/5 border-b border-accent/10">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-lg font-headline font-bold flex items-center text-accent">
-                      <Code className="w-5 h-5 mr-2" /> SEO & Google AdSense Setup
+                      <Code className="w-5 h-5 mr-2" /> SEO & AdSense Master Editor
                     </CardTitle>
                     {isConfigLoading && <RefreshCw className="w-4 h-4 animate-spin text-accent" />}
                   </div>
                   <CardDescription className="font-medium">
-                    Paste your AdSense verification code or Auto-Ads script below.
+                    Paste Google AdSense script or Meta Tags. Changes reflect on all pages.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
@@ -287,18 +234,14 @@ export function AdminScreen() {
                       value={adsenseCode}
                       onChange={(e) => setAdsenseCode(e.target.value)}
                     />
-                    <div className="absolute top-2 right-2">
-                      <Badge variant="outline" className="bg-white/80 font-mono text-[10px]">HTML/JS EDITOR</Badge>
-                    </div>
                   </div>
-                  
                   <Button 
                     onClick={handleUpdateConfig} 
                     disabled={isSaving}
                     className="w-full rounded-2xl py-7 font-bold bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-lg transition-transform active:scale-95"
                   >
                     {isSaving ? <RefreshCw className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
-                    Save & Inject System Config
+                    Save & Update Site System
                   </Button>
                 </CardContent>
               </Card>

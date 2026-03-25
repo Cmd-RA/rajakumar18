@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -37,18 +38,16 @@ export function PolicyScreen({ onBack }: PolicyScreenProps) {
                   <CardTitle className="flex items-center text-primary font-headline">
                     <ShieldCheck className="w-6 h-6 mr-2" /> Privacy Policy
                   </CardTitle>
-                  <CardDescription>Last Updated: October 2023</CardDescription>
+                  <CardDescription>AdSense Compliant | Updated: 2024</CardDescription>
                 </CardHeader>
                 <CardContent className="prose prose-sm dark:prose-invert space-y-4 text-muted-foreground font-medium">
-                  <p>At ChannelVista, we prioritize your privacy. This policy outlines how we handle your data.</p>
-                  <h4 className="text-foreground font-bold">1. Data We Collect</h4>
-                  <p>We collect information provided during signup (Email, Name) and any photos or captions you upload to the platform.</p>
-                  <h4 className="text-foreground font-bold">2. Google AdSense & Cookies</h4>
-                  <p>We use Google AdSense to serve ads. Google may use cookies to serve ads based on your visit to this site and other sites on the Internet.</p>
-                  <h4 className="text-foreground font-bold">3. Content Safety</h4>
-                  <p>Our AI moderation system checks captions for policy compliance to ensure a safe community environment.</p>
-                  <h4 className="text-foreground font-bold">4. Your Rights</h4>
-                  <p>You can delete your posts or request account deletion at any time by contacting support.</p>
+                  <p>At ChannelVista, your privacy is our priority. We collect minimal data (Email, Profile Info) only to provide a better vision sharing experience.</p>
+                  <h4 className="text-foreground font-bold">1. Cookie Usage</h4>
+                  <p>We use Google AdSense cookies to serve ads based on user interests. Users can opt out via Google Ad Settings.</p>
+                  <h4 className="text-foreground font-bold">2. Data Security</h4>
+                  <p>All photos and interactions are stored securely on Firebase cloud servers. We never sell your personal data to third parties.</p>
+                  <h4 className="text-foreground font-bold">3. Rights</h4>
+                  <p>You have the full right to delete your content or request account removal through our customer support dashboard.</p>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -57,18 +56,16 @@ export function PolicyScreen({ onBack }: PolicyScreenProps) {
               <Card className="rounded-3xl border-2 border-primary/10 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary font-headline">
-                    <ScrollText className="w-6 h-6 mr-2" /> Terms & Conditions
+                    <ScrollText className="w-6 h-6 mr-2" /> Terms of Service
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="prose prose-sm dark:prose-invert space-y-4 text-muted-foreground font-medium">
-                  <h4 className="text-foreground font-bold">1. User Content</h4>
-                  <p>Users are solely responsible for the photos they upload. Content must be original. Copied or copyrighted material is strictly prohibited.</p>
-                  <h4 className="text-foreground font-bold">2. Monetization Rules</h4>
-                  <p>Monetization is only available to users who reach 5000 followers and comply with Google AdSense policies.</p>
-                  <h4 className="text-foreground font-bold">3. Prohibited Behavior</h4>
-                  <p>Harassment, spam, and adult content will result in immediate account termination.</p>
-                  <h4 className="text-foreground font-bold">4. Live Streams</h4>
-                  <p>The Admin (Malik) reserves the right to stream live content to the community.</p>
+                  <h4 className="text-foreground font-bold">1. Content Ownership</h4>
+                  <p>You must own the rights to any photo you upload. Copied content will be removed immediately.</p>
+                  <h4 className="text-foreground font-bold">2. Monetization Policy</h4>
+                  <p>To qualify for earnings, you must reach 5000 followers and maintain an original, policy-compliant channel.</p>
+                  <h4 className="text-foreground font-bold">3. Prohibited Content</h4>
+                  <p>No adult, violent, or copyright-infringing material. Violators will be banned permanently without payout.</p>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -82,13 +79,10 @@ export function PolicyScreen({ onBack }: PolicyScreenProps) {
                 </CardHeader>
                 <CardContent className="space-y-4 text-muted-foreground font-medium leading-relaxed">
                   <p>
-                    ChannelVista is a premier photo-social platform designed for visual storytellers. Every user on our platform is a "Channel" owner, sharing their unique vision with the world.
+                    ChannelVista is a next-generation photo social platform where every user owns a "Channel". Our vision is to empower visual storytellers with monetization and real-time engagement.
                   </p>
                   <p>
-                    Our mission is to empower creators by providing a lightweight, fast, and monetizable platform. We blend the best of photography social networks with a YouTube-style growth system.
-                  </p>
-                  <p>
-                    Built with advanced AI features like voice-to-caption and automated moderation, we ensure that original content is rewarded and the community remains safe.
+                    Built with speed and simplicity in mind, we provide a mobile-first experience that rivals traditional social networks.
                   </p>
                 </CardContent>
               </Card>
@@ -98,30 +92,22 @@ export function PolicyScreen({ onBack }: PolicyScreenProps) {
               <Card className="rounded-3xl border-2 border-primary/10 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary font-headline">
-                    <UserCircle className="w-6 h-6 mr-2" /> Contact Us
+                    <UserCircle className="w-6 h-6 mr-2" /> Contact Malik Team
                   </CardTitle>
-                  <CardDescription>Get in touch with the Malik Team</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-center p-4 bg-muted/30 rounded-2xl border border-border">
                     <Mail className="w-5 h-5 mr-4 text-primary" />
                     <div>
-                      <p className="text-[10px] uppercase font-bold text-muted-foreground">Official Email</p>
+                      <p className="text-[10px] uppercase font-bold text-muted-foreground">Support Email</p>
                       <p className="font-bold">rajahribabakumar@gmail.com</p>
                     </div>
                   </div>
                   <div className="flex items-center p-4 bg-muted/30 rounded-2xl border border-border">
                     <Phone className="w-5 h-5 mr-4 text-green-600" />
                     <div>
-                      <p className="text-[10px] uppercase font-bold text-muted-foreground">Phone / WhatsApp</p>
+                      <p className="text-[10px] uppercase font-bold text-muted-foreground">WhatsApp Support</p>
                       <p className="font-bold">+91 9682316132</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center p-4 bg-primary/5 rounded-2xl border border-primary/10">
-                    <Globe className="w-5 h-5 mr-4 text-primary" />
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-muted-foreground">Location</p>
-                      <p className="font-bold">Global / Online Platform</p>
                     </div>
                   </div>
                 </CardContent>
@@ -130,8 +116,7 @@ export function PolicyScreen({ onBack }: PolicyScreenProps) {
           </Tabs>
 
           <div className="mt-12 text-center text-xs text-muted-foreground">
-            <p>&copy; 2023 ChannelVista. All Rights Reserved.</p>
-            <p className="mt-2 font-bold text-primary">Managed by Malik Team</p>
+            <p>&copy; 2024 ChannelVista. Managed by Malik Team.</p>
           </div>
         </div>
       </ScrollArea>
